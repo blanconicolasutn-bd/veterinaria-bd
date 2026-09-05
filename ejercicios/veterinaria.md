@@ -20,7 +20,7 @@ Tablas: `dueno`, `mascota`, `veterinario`, `consulta`, `medicamento`, `receta`
 5. Listar las consultas realizadas durante el año 2024, ordenadas por fecha.
 6. Listar el nombre y la presentación de los medicamentos que vengan en comprimidos.
 7. Listar las mascotas nacidas antes del año 2020.
-8. Mostrar, en una sola columna con el alias `nombre_completo`, el nombre y apellido de cada dueño.
+8. Mostrar, en una sola columna con el alias `nombre_completo`, el nombre y apellido de cada dueño. (concatenacion de campos en select con "|")
 9. Listar las consultas cuyo motivo contenga la palabra "control" (sin importar mayúsculas/minúsculas).
 10. Listar las mascotas cuya especie sea "Perro" o "Gato".
 11. Listar los dueños que no tengan un teléfono cargado.
@@ -35,7 +35,7 @@ Tablas: `dueno`, `mascota`, `veterinario`, `consulta`, `medicamento`, `receta`
 6. Listar el nombre del medicamento, la dosis y la fecha de la consulta en la que fue recetado.
 7. Listar las mascotas que nunca tuvieron ninguna consulta.
 8. Listar los medicamentos que nunca fueron recetados.
-9. Para cada consulta que haya recetado más de un medicamento, listar la fecha de la consulta y el nombre de la mascota (sin repetir la fila por cada medicamento).
+
 
 ### Consultas estadísticas (resumen)
 
@@ -48,6 +48,8 @@ Tablas: `dueno`, `mascota`, `veterinario`, `consulta`, `medicamento`, `receta`
 7. Listar los medicamentos que fueron recetados más de una vez.
 8. Calcular la duración promedio (en días) de los tratamientos recetados.
 9. Listar el apellido del dueño con más mascotas registradas.
+10. Para cada consulta que haya recetado más de un medicamento, listar la fecha de la consulta y el nombre de la mascota (sin repetir la fila por cada medicamento).
+11. Listar las mascotas que nunca tuvieron ninguna consulta. (otra forma para el punto 7)
 
 ### Subconsultas
 

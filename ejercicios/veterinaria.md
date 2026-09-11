@@ -20,7 +20,7 @@ Tablas: `dueno`, `mascota`, `veterinario`, `consulta`, `medicamento`, `receta`
 5. Listar las consultas realizadas durante el año 2024, ordenadas por fecha.
 6. Listar el nombre y la presentación de los medicamentos que vengan en comprimidos.
 7. Listar las mascotas nacidas antes del año 2020.
-8. Mostrar, en una sola columna con el alias `nombre_completo`, el nombre y apellido de cada dueño. (concatenacion de campos en select con "|")
+8. Mostrar, en una sola columna con el alias `nombre_completo`, el nombre y apellido de cada dueño. (concatenación de campos en select con `||`)
 9. Listar las consultas cuyo motivo contenga la palabra "control" (sin importar mayúsculas/minúsculas).
 10. Listar las mascotas cuya especie sea "Perro" o "Gato".
 11. Listar los dueños que no tengan un teléfono cargado.

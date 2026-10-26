@@ -14,6 +14,9 @@ Material de práctica del ejercicio de la veterinaria (Unidad IV — DDL/DML/con
 - **`ejercicios/normalizacion.md`** — ejercicios de normalización de la **Clase 7**: tres planillas para llevar a 3FN, con el formato de entrega por Pull Request.
 - **`ejercicios/Normalización - 10 ejercicios hasta 3FN.md`** — los **diez** ejercicios que se corrigen en la **Clase 9**. En los primeros seis los datos vienen en una planilla; en los últimos cuatro hay que deducir las dependencias a partir de la descripción del sistema.
 - **`ejercicios/resoluciones normalizacion/`** — las resoluciones paso a paso (1FN, 2FN y 3FN) de las dos guías: la de la Clase 7 y la de los diez ejercicios de la Clase 9. Esta última muestra además **cómo quedan los datos** en cada forma normal, no solo el esquema.
+- **`ejercicios/transacciones/`** — diez ejercicios de transacciones sobre la veterinaria: `begin`, `commit`, `rollback` y, los dos últimos, `savepoint`. Ocho se resuelven en Supabase; los otros dos necesitan un cliente que mantenga la sesión abierta, y la guía explica por qué.
+- **`ejercicios/funciones/`** — dos guías de diez ejercicios cada una (Unidad VI). La primera practica **una pieza por ejercicio** —`language sql`, `declare`, `if`, `found`, `%rowtype`, `returns table`, `create procedure`—; la segunda las combina: bloques `do`, funciones que validan y cortan con `raise exception`, y el error que deshace lo que hizo quien lo llamó.
+- **`autochequeo/`** — un script para **verificar tus propias respuestas** de esos dos últimos conjuntos. No trae las soluciones: trae las verificaciones, y cuando algo está mal te dice qué mirar.
 - **`ejercicios repaso primera parte/`** — ejercicios integradores de repaso (Unidad I a IV bis): teoría, DER, DDL, consultas, subconsultas y transacciones, con sus resoluciones. Incluye ejercicios extra de subconsultas en SELECT, FROM y WHERE sobre la veterinaria.
 - **`practica/`** — espacio opcional para practicar el flujo de Pull Request (ver abajo).
 
@@ -34,6 +37,14 @@ Material de práctica del ejercicio de la veterinaria (Unidad IV — DDL/DML/con
 5. Para los ejercicios, corré `sql/05_normalizacion_ejercicios.sql` y verificá tus respuestas con los bloques `[V.x]` de `sql/06_normalizacion_ejercicios_consultas.sql`: si tu descomposición es correcta, devuelven **cero filas**.
 
 > Si corrés el archivo entero de una, Supabase muestra únicamente el resultado del último `SELECT`. Por eso conviene ir de a bloques.
+
+## Transacciones y funciones (Unidades IV bis y VI)
+
+1. Resolvé las guías de `ejercicios/transacciones/` y `ejercicios/funciones/` en tu propio proyecto de Supabase, con las tablas de `sql/01_esquema.sql` y `sql/02_datos.sql` cargadas.
+2. Verificá tus respuestas con `autochequeo/09_autochequeo_ejercicios.sql`, de a un bloque por vez. La mayoría de los chequeos responden `OK` o `MAL`, y cuando dicen `MAL` indican qué revisar.
+3. Algunos bloques **tienen que dar error**: están marcados, y ahí el ERROR rojo es la respuesta correcta.
+
+> Los ejercicios 3 y 9 de transacciones no se pueden hacer en el SQL Editor: los dos necesitan ver fallar una sentencia y seguir en la misma transacción, y el editor manda el bloque entero de una vez. Se hacen en `psql`, pgAdmin o DBeaver, o se ven en clase. Está explicado en `autochequeo/README.md`.
 
 ## Practicar el flujo de Fork + Pull Request
 

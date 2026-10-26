@@ -16,7 +16,7 @@ No se puede partir una transacción en dos ejecuciones —correr el `begin` por 
 
 En el ejercicio 1 hay una verificación para confirmar que tu editor se comporta así. Conviene hacerla antes que nada.
 
-**Dos de los diez necesitan otro programa.** Los ejercicios **3** y **9** se basan en ver un error *y seguir trabajando en la misma transacción*. Eso en el editor de Supabase no se puede: cuando una sentencia falla, **todo lo que viene después del error ni siquiera se ejecuta**, porque el editor manda el bloque entero de una sola vez. Esos dos se hacen en un programa que mantenga la sesión abierta —`psql`, pgAdmin o DBeaver—, donde uno escribe una sentencia, ve qué pasó, y recién entonces escribe la siguiente. Los otros ocho corren en Supabase sin problema.
+**Cuando algo falla, lo que sigue no se ejecuta.** El editor manda el bloque entero de una sola vez, así que la primera sentencia que da error corta ahí: las que venían después ni se intentan. No es un problema, es parte de lo que vamos a estudiar — los ejercicios **3** y **9** son justamente sobre eso.
 
 **Supabase muestra solo el último `select` de cada ejecución.** Por eso la guía usa siempre el mismo esquema: **un solo `select` adentro de la transacción** —el que muestra lo que la transacción hizo— y, cuando hace falta comprobar que el `rollback` funcionó, **otra ejecución aparte** con el `select` de control. Nunca dos `select` en el mismo bloque esperando ver los dos.
 
@@ -95,20 +95,26 @@ Repetir el alta del ejercicio 1, pero **terminarla con `rollback`** en lugar de 
 
 ## Ejercicio 3 — La transacción que se aborta
 
-> Este ejercicio se hace en `psql`, pgAdmin o DBeaver, escribiendo **una sentencia por vez**.
+En una sola ejecución, y dentro de una misma transacción:
 
-Dentro de una misma transacción:
-
-1. Insertar una mascota con `id_dueno = 99`, que no existe.
-2. A continuación, intentar insertar una mascota **válida**, del dueño 1.
+1. Insertar una mascota con `id_dueno = 99`, que **no existe**.
+2. A continuación, insertar una mascota **válida**, del dueño 1, llamada `Lola`.
 3. Cerrar con `commit`.
+
+Después, **en otra ejecución**, verificar qué quedó:
+
+```sql
+select count(*) as cuantas
+from mascota where nombre in ('Fantasma', 'Lola');
+```
 
 **Se pide:**
 
-- Copiar los **dos** errores: el del primer `insert` y el del segundo.
-- Explicar en dos renglones por qué falla la segunda sentencia, **si no tiene nada malo**.
-- Indicar qué hay que hacer para poder seguir trabajando.
-- Decir qué quedó guardado al final, y por qué.
+- Copiar el error que devuelve el bloque.
+- **¿Cuántos errores viste?** Son dos `insert` y uno de ellos es correcto: la respuesta a esa pregunta explica sola por qué `Lola` tampoco quedó.
+- Decir cuánto devolvió el `select` de control, y por qué.
+
+**Tiene que devolver** `0`.
 
 ---
 
@@ -177,8 +183,6 @@ Hay que subirle 1 kg el peso a **todos los perros del dueño 3**. El dueño 3 ti
 
 ## Ejercicio 9 — Tres recetas y una repetida (`savepoint`)
 
-> Este ejercicio se hace en `psql`, pgAdmin o DBeaver, escribiendo **una sentencia por vez**: hay que ver fallar el tercer `insert` para recién entonces decidir qué hacer.
-
 Hay que agregarle a la consulta **1** tres medicamentos:
 
 | medicamento | dosis | frecuencia | días |
@@ -189,13 +193,31 @@ Hay que agregarle a la consulta **1** tres medicamentos:
 
 El tercero **está repetido**: `receta` tiene clave primaria `(id_consulta, id_medicamento)`.
 
+**Primera parte — el problema.** Cargar los tres con tres `insert` sueltos, dentro de una transacción. Verificar después cuántas recetas quedó teniendo la consulta 1.
+
+**Tiene que devolver** `0`: el error del tercero se llevó puestos los dos primeros.
+
+**Segunda parte — la solución.** Lograr que **el repetido falle pero los otros dos queden**.
+
+Para eso hace falta una pieza nueva. En un bloque `do`, un `begin ... end` interno puede llevar un `exception`:
+
+```sql
+begin
+  <la sentencia riesgosa>;
+exception when unique_violation then
+  <qué hacer si falló>;
+end;
+```
+
+Ese bloque interno **es un savepoint**: Postgres lo marca solo. Si la sentencia de adentro falla, se deshace lo que ese bloque hizo —nada más que eso— y la transacción sigue viva. Es la misma idea de `savepoint` + `rollback to`, escrita como código.
+
 **Se pide:**
 
-1. Cargar los tres en una sola transacción, de forma tal que **el repetido falle pero los otros dos queden**.
+1. Escribir el bloque `do` con los tres `insert`, donde el tercero esté protegido.
 2. Verificar que la consulta 1 terminó con exactamente **dos** recetas.
-3. Terminar con `rollback`.
+3. Dejar la base como estaba.
 
-**Pista:** sin `savepoint`, el error del tercero tira abajo los dos primeros. Esa es la razón por la que existen los `savepoint`.
+**Pista:** el nombre del error de clave duplicada es `unique_violation`. También sirve `others`, que atrapa cualquiera.
 
 ---
 

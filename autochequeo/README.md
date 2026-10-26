@@ -28,15 +28,13 @@ Algunos bloques **tienen que dar error**, y está marcado con `TIENE QUE DAR ERR
 
 El bloque `[F.0]` es útil al principio: lista cuáles de las seis funciones tenés creadas.
 
-## Dos ejercicios que no se pueden hacer en Supabase
+## Los ejercicios 3 y 9 de transacciones
 
-Los ejercicios **3 y 9 de transacciones** no se pueden resolver en el SQL Editor, y el script lo dice en su lugar.
+Son los dos que tratan sobre qué pasa cuando algo falla en el medio de una transacción, y los dos se resuelven **en Supabase**, como todos los demás.
 
-Los dos se basan en ver fallar una sentencia y **seguir trabajando en la misma transacción**. El editor de Supabase manda el bloque entero de una sola vez: cuando algo falla, lo que viene después ni siquiera se ejecuta, así que nunca llegás a escribir la sentencia siguiente.
+El **3** se apoya en algo que conviene entender temprano: cuando una sentencia da error, lo que viene después en esa ejecución **ni siquiera se intenta**. Por eso ahí vas a ver un solo mensaje de error aunque haya dos `insert`.
 
-Para hacerlos hace falta un programa que mantenga la sesión abierta —`psql`, pgAdmin o DBeaver—, donde se escribe una sentencia, se ve qué pasó, y recién entonces se escribe la próxima. Los dos últimos son gratis y están en la diapositiva de Materiales de cualquier clase.
-
-**No se ven en clase**, así que conviene hacerlos. Si no llegás a instalar el cliente, leé igual los dos enunciados y pensá la respuesta: lo que muestran —qué le pasa a una transacción después de un error, y cómo se recupera sin perder lo que ya estaba bien— no aparece en ningún otro ejercicio de la guía.
+El **9** necesita una pieza que no salió en la clase de transacciones: un `begin ... exception ... end` adentro de un bloque `do`. Ese bloque interno **es un savepoint** que Postgres marca solo. El enunciado lo explica y te muestra la forma; no hace falta saberlo de antes.
 
 ## Al final
 

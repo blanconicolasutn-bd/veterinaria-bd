@@ -71,11 +71,21 @@ from dueno where dni = '27888999';
 
 
 -- ════════════════════════════════════════════════════════════
--- [T.3] NO SE HACE ACÁ
---       Necesitás psql, pgAdmin o DBeaver: hay que ver fallar
---       una sentencia y seguir escribiendo en la misma
---       transacción, y este editor manda todo el bloque junto.
+-- [T.3] La transacción que se aborta
+--       Tu bloque tenía que cortar con el error de FK.
+--       Esto verifica que NO quedó ninguna de las dos mascotas.
 -- ════════════════════════════════════════════════════════════
+
+
+select case
+         when count(*) = 0 then 'OK — no quedó ninguna de las dos'
+         else 'MAL — quedaron ' || count(*) || ': ¿pusiste commit en vez '
+              || 'de dejar que el error cortara?'
+       end as resultado
+from mascota where nombre in ('Fantasma', 'Lola');
+
+-- Ojo: tenés que haber visto UN SOLO error, no dos. El segundo insert
+-- nunca llegó a ejecutarse.
 
 
 -- ════════════════════════════════════════════════════════════
@@ -148,10 +158,24 @@ select case
 
 
 -- ════════════════════════════════════════════════════════════
--- [T.9] NO SE HACE ACÁ
---       Mismo motivo que el [T.3]: hay que ver fallar el tercer
---       insert para recién entonces escribir el rollback to.
+-- [T.9] Tres recetas y una repetida
+--       Corré esto DESPUÉS de tu bloque do con el exception.
 -- ════════════════════════════════════════════════════════════
+
+
+select case
+         when count(*) = 2 then 'OK — el repetido falló y los otros dos quedaron'
+         when count(*) = 0 then 'MAL — se perdieron los tres: el bloque interno '
+              || 'con exception tiene que envolver SOLO al insert repetido'
+         else 'MAL — quedaron ' || count(*)
+       end as resultado
+from receta where id_consulta = 1;
+
+
+-- ════════════════════════════════════════════════════════════
+-- [T.9b] Dejá la base como estaba
+-- ════════════════════════════════════════════════════════════
+delete from receta where id_consulta = 1;
 
 
 -- ════════════════════════════════════════════════════════════

@@ -215,10 +215,14 @@ from mascota where id_mascota = 1;
 -- ════════════════════════════════════════════════════════════
 -- [F.2] registrar_peso: el camino que funciona
 -- ════════════════════════════════════════════════════════════
-select case when registrar_peso(1, 30.00) = 'Rocky: 28.50 kg → 30.00 kg'
+-- se la llama UNA sola vez: la función modifica el peso, así que
+-- llamarla de nuevo para el mensaje de error daría un texto falso
+with r as (select registrar_peso(1, 30.00) as devuelto)
+select case when devuelto = 'Rocky: 28.50 kg → 30.00 kg'
             then 'OK'
-            else 'MAL — devolvió: ' || registrar_peso(1, 30.00)
-       end as resultado;
+            else 'MAL — devolvió: ' || devuelto
+       end as resultado
+from r;
 
 -- Ojo: esto deja a Rocky en 30.00. Lo arregla el bloque [F.2d].
 

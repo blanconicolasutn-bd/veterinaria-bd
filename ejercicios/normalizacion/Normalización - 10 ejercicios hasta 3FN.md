@@ -8,7 +8,7 @@ En todos se pide lo mismo: **llevar el modelo a 3FN**, indicando en cada paso qu
 
 Notación para las respuestas: `tabla(columna PK, columna, columna FK → otra_tabla)`.
 
-La resolución paso a paso, con cómo quedan los datos en cada forma normal, está en [`resoluciones normalizacion/`](resoluciones%20normalizacion/Normalizaci%C3%B3n%20-%2010%20ejercicios%20hasta%203FN%20-%20Resoluciones.md).
+La resolución paso a paso, con cómo quedan los datos en cada forma normal, está en [`resoluciones/`](resoluciones/Normalizaci%C3%B3n%20-%2010%20ejercicios%20hasta%203FN%20-%20Resoluciones.md).
 
 ---
 

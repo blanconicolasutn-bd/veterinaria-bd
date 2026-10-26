@@ -1,6 +1,6 @@
 # Resolución — Ejercicios de normalización
 
-Resolución de los ejercicios de [`ejercicios/normalizacion.md`](../normalizacion.md). Conviene intentar resolverlos antes de mirarla.
+Resolución de los ejercicios de [`Normalización - 3 ejercicios (Clase 7).md`](../Normalizaci%C3%B3n%20-%203%20ejercicios%20(Clase%207).md). Conviene intentar resolverlos antes de mirarla.
 
 Cada ejercicio sigue el mismo esquema que vimos en la Clase 7:
 

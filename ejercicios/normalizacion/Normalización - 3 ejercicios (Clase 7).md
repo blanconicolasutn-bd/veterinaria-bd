@@ -4,7 +4,7 @@
 
 Tres planillas para llevar hasta la **tercera forma normal (3FN)**. Son los ejercicios para la casa de la Clase 7: se entregan por Pull Request y se revisan en la Clase 8.
 
-La resolución paso a paso está en [`resoluciones normalizacion/`](resoluciones%20normalizacion/Resoluci%C3%B3n%20-%20Normalizaci%C3%B3n.md).
+La resolución paso a paso está en [`resoluciones/`](resoluciones/Resoluci%C3%B3n%20-%20Normalizaci%C3%B3n%20(Clase%207).md).
 
 ---
 

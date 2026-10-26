@@ -24,7 +24,11 @@ El orden es:
 
 La mayoría de los chequeos devuelven una columna que dice `OK` o `MAL`. Cuando dice `MAL`, el texto indica qué revisar — no hace falta adivinar.
 
-Algunos bloques **tienen que dar error**, y está marcado con `TIENE QUE DAR ERROR` arriba. En esos casos el ERROR rojo es la respuesta correcta: lo que estamos probando es justamente que tu función corte cuando tiene que cortar. Si devuelve un valor en lugar de cortar, ahí sí está mal.
+**Algunos bloques tienen que dar error.** Están marcados con `TIENE QUE DAR ERROR` justo arriba, y abajo dice cuál es el mensaje esperado.
+
+Son los que llaman a tu función con datos imposibles —por ejemplo, un peso de 150 kg— para comprobar que **se niegue**. Si Supabase te devuelve el mensaje de error que figura en el comentario, está bien: tu función hizo exactamente lo que tenía que hacer.
+
+Lo que estaría mal es lo contrario: que en vez de cortar te devuelva un valor. Ahí falta la validación.
 
 El bloque `[F.0]` es útil al principio: lista cuáles de las seis funciones tenés creadas.
 

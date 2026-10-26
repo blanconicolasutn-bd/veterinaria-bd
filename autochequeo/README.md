@@ -34,7 +34,9 @@ Los ejercicios **3 y 9 de transacciones** no se pueden resolver en el SQL Editor
 
 Los dos se basan en ver fallar una sentencia y **seguir trabajando en la misma transacción**. El editor de Supabase manda el bloque entero de una sola vez: cuando algo falla, lo que viene después ni siquiera se ejecuta, así que nunca llegás a escribir la sentencia siguiente.
 
-Para hacerlos hace falta un programa que mantenga la sesión abierta —`psql`, pgAdmin o DBeaver—, donde se escribe una sentencia, se ve qué pasó, y recién entonces se escribe la próxima. Si no los hacés, no pasa nada: se ven en clase.
+Para hacerlos hace falta un programa que mantenga la sesión abierta —`psql`, pgAdmin o DBeaver—, donde se escribe una sentencia, se ve qué pasó, y recién entonces se escribe la próxima. Los dos últimos son gratis y están en la diapositiva de Materiales de cualquier clase.
+
+**No se ven en clase**, así que conviene hacerlos. Si no llegás a instalar el cliente, leé igual los dos enunciados y pensá la respuesta: lo que muestran —qué le pasa a una transacción después de un error, y cómo se recupera sin perder lo que ya estaba bien— no aparece en ningún otro ejercicio de la guía.
 
 ## Al final
 

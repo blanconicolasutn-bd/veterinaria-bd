@@ -520,6 +520,115 @@ select case when diagnostico = 'Sano'
 from consulta where id_consulta = 1;
 
 
+
+-- ============================================================
+--                   PARTE TR — TRIGGERS
+--
+--  Los chequeos LLAMAN a tus triggers insertando o modificando
+--  filas de verdad, y después limpian lo que ensuciaron.
+-- ============================================================
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.0] ¿Están creados los tres triggers?
+-- ════════════════════════════════════════════════════════════
+select c.relname as tabla, t.tgname as trigger
+from pg_trigger t
+join pg_class c on c.oid = t.tgrelid
+where not t.tgisinternal
+  and c.relname in ('mascota', 'receta')
+order by c.relname, t.tgname;
+
+-- Tienen que aparecer tres. Los que falten, no están creados.
+-- OJO: si acá aparecen triggers con nombres raros que no creaste
+-- vos, mirá bien antes de borrar nada.
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.1] El nombre se guarda prolijo
+-- ════════════════════════════════════════════════════════════
+insert into mascota (id_dueno, nombre, especie)
+values (1, '   rocKY junior  ', 'Perro');
+
+select case
+         when count(*) = 1 then 'OK — initcap y trim aplicados'
+         when exists (select 1 from mascota
+                      where nombre like '%rocKY%' or nombre like '% %junior%')
+              then 'MAL — el nombre entró tal cual: ¿pusiste after en vez de before, '
+                   || 'o te falta el return new?'
+         else 'MAL — no se guardó nada: ¿la función termina en return null?'
+       end as resultado
+from mascota where nombre = 'Rocky Junior';
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.1b] Dejá la base como estaba
+-- ════════════════════════════════════════════════════════════
+delete from mascota
+where nombre in ('Rocky Junior', '   rocKY junior  ', 'rocKY junior');
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.2] La primera receta entra
+-- ════════════════════════════════════════════════════════════
+insert into receta (id_consulta, id_medicamento, dosis, duracion_dias)
+values (1, 3, '1 ampolla', 5);
+
+select case when count(*) = 1 then 'OK — la primera entró'
+            else 'MAL — el trigger está cortando la primera también' end as resultado
+from receta where id_consulta = 1 and id_medicamento = 3;
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.2b] Y la repetida corta CON TU MENSAJE
+-- ════════════════════════════════════════════════════════════
+insert into receta (id_consulta, id_medicamento, dosis, duracion_dias)
+values (1, 3, '1 ampolla', 5);
+
+-- TIENE QUE DAR ERROR:
+--   "El medicamento 3 ya está recetado en la consulta 1"
+--
+-- Si el error habla de "duplicate key" o de "receta_pkey", el que
+-- cortó fue la clave primaria y no tu trigger: revisá que sea
+-- BEFORE insert, no after.
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.2c] Dejá la base como estaba
+-- ════════════════════════════════════════════════════════════
+delete from receta where id_consulta = 1;
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.3] El historial registra solo los cambios de verdad
+-- ════════════════════════════════════════════════════════════
+delete from peso_historial;
+
+update mascota set peso_kg = 30.00 where id_mascota = 1;   -- cambia
+update mascota set peso_kg = 30.00 where id_mascota = 1;   -- mismo valor
+update mascota set raza = 'Labrador' where id_mascota = 1; -- otra columna
+
+select case
+         when count(*) = 0 then 'MAL — no registró nada: ¿el trigger es after '
+              || 'update OF peso_kg, y for each row?'
+         when count(*) > 1 then 'MAL — registró ' || count(*) || ' veces: te falta '
+              || 'el when (new.peso_kg is distinct from old.peso_kg)'
+         when (select peso_anterior from peso_historial) = 28.50
+          and (select peso_nuevo    from peso_historial) = 30.00
+              then 'OK — una sola fila, con el anterior y el nuevo'
+         else 'MAL — registró una fila pero los pesos no son los esperados: '
+              || '¿usaste new para los dos?'
+       end as resultado
+from peso_historial;
+
+
+-- ════════════════════════════════════════════════════════════
+-- [TR.3b] Dejá la base como estaba
+-- ════════════════════════════════════════════════════════════
+update mascota set peso_kg = 28.50, raza = 'Labrador' where id_mascota = 1;
+delete from peso_historial;
+
+
 -- ════════════════════════════════════════════════════════════
 -- CONTROL FINAL: ¿quedó la base como al principio?
 --

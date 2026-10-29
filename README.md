@@ -10,7 +10,9 @@ Material de práctica del ejercicio de la veterinaria (Unidad IV — DDL/DML/con
 - **`ejercicios/veterinaria.md`** — guía de ejercicios de consultas sobre este modelo.
 - **`ejercicios/transacciones/`** — diez ejercicios de transacciones sobre la veterinaria: `begin`, `commit`, `rollback` y, los dos últimos, `savepoint`. Ocho se resuelven en Supabase; los otros dos necesitan un cliente que mantenga la sesión abierta, y la guía explica por qué.
 - **`ejercicios/funciones/`** — dos guías de diez ejercicios cada una (Unidad VI). La primera practica **una pieza por ejercicio** —`language sql`, `declare`, `if`, `found`, `%rowtype`, `returns table`, `create procedure`—; la segunda las combina: bloques `do`, funciones que validan y cortan con `raise exception`, y el error que deshace lo que hizo quien lo llamó.
-- **`autochequeo/`** — un script para **verificar tus propias respuestas** de esos dos últimos conjuntos. No trae las soluciones: trae las verificaciones, y cuando algo está mal te dice qué mirar.
+- **`ejercicios/triggers/`** — tres ejercicios de triggers sobre la veterinaria (Unidad VI): uno que corrige el dato antes de guardarlo, uno que impide un duplicado con un mensaje que se entiende, y uno que lleva el historial de cambios de peso.
+- **`ejercicios/indices/`** — índices y optimización (Unidad VII): un script que genera dos tablas grandes —20.000 mascotas y 200.000 consultas— y otro de 24 bloques para ver con `EXPLAIN` cuándo el motor usa un índice y cuándo no. Tiene su propio README.
+- **`autochequeo/`** — un script para **verificar tus propias respuestas** de transacciones, funciones y triggers. No trae las soluciones: trae las verificaciones, y cuando algo está mal te dice qué mirar.
 - **`ejercicios repaso primera parte/`** — ejercicios integradores de repaso (Unidad I a IV bis): teoría, DER, DDL, consultas, subconsultas y transacciones, con sus resoluciones. Incluye ejercicios extra de subconsultas en SELECT, FROM y WHERE sobre la veterinaria.
 - **`practica/`** — espacio opcional para practicar el flujo de Pull Request (ver abajo).
 

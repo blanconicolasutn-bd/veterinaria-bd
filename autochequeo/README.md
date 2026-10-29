@@ -40,6 +40,12 @@ El **3** se apoya en algo que conviene entender temprano: cuando una sentencia d
 
 El **9** necesita una pieza que no salió en la clase de transacciones: un `begin ... exception ... end` adentro de un bloque `do`. Ese bloque interno **es un savepoint** que Postgres marca solo. El enunciado lo explica y te muestra la forma; no hace falta saberlo de antes.
 
+## Los triggers
+
+Los bloques `[TR.x]` prueban tus triggers de verdad: insertan y modifican filas, miran qué quedó, y después limpian lo que ensuciaron. Arrancá por `[TR.0]`, que lista cuáles tenés creados.
+
+El `[TR.2b]` es uno de los que **tiene que dar error**, y además importa CUÁL error: si el mensaje habla de `receta_pkey`, el que cortó fue la clave primaria y no tu trigger.
+
 ## Al final
 
 El último bloque del script verifica que la base haya quedado como al principio: 5 dueños, 10 mascotas, 16 consultas y 11 recetas.

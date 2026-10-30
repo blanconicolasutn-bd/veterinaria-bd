@@ -273,12 +273,41 @@ explain analyze
 select * from ix_consulta
 where importe > 45000 and fecha = date '2024-06-15';
 -- ESPERADO: usa idx_cons_caras.
+--
+-- MEDIDO EL 29/10: Index Scan using idx_cons_caras
+--   (cost=0.29..14.80 rows=12 width=42)
+--   Index Cond: (fecha = '2024-06-15'::date)
+--   Execution Time: 0.205 ms
+--
+-- Un índice que pesa una fracción del completo, resolviendo la
+-- consulta en 0,2 ms.
 
 explain analyze
 select * from ix_consulta
 where fecha = date '2024-06-15';
 -- ESPERADO: NO usa idx_cons_caras — sin la condición del importe,
 -- el motor no puede saber que ese índice alcanza.
+--
+-- MEDIDO EL 29/10: Index Scan using idx_cons_vet_fecha
+--   (cost=0.29..1805.24 rows=92 width=42)
+--   Index Cond: (fecha = '2024-06-15'::date)
+--   Execution Time: 27.274 ms
+--
+-- Efectivamente lo ignoró. Y fijate QUÉ usó en su lugar: el
+-- idx_cons_vet_fecha de [4.1], o sea el plan caro del bloque
+-- [4.3], recorriendo el índice entero.
+--
+--     con la condición del importe   idx_cons_caras     0,205 ms
+--     sin la condición del importe   idx_cons_vet_fecha  27,274 ms
+--
+-- Misma fecha, mismas filas, 130 veces más lento. El índice
+-- parcial estaba ahí y habría servido: el motor no lo puede usar
+-- porque no tiene cómo garantizar que las filas que busca estén
+-- adentro del pedazo que ese índice cubre.
+--
+-- La moraleja del bloque: un índice parcial es barato, pero solo
+-- aparece si la consulta repite su where. Si tus consultas no lo
+-- repiten, es un índice que pagás y no usas.
 
 
 -- ════════════════════════════════════════════════════════════

@@ -409,6 +409,14 @@ select 900000 + g, 1, 1001, current_date, 'Prueba', 'Sano', 1000
 from generate_series(1, 20000) g;
 rollback;
 -- ESPERADO: anotá el Execution Time.
+--
+-- SI SUPABASE NO TE MUESTRA EL PLAN: el bloque termina en
+-- rollback, que no devuelve filas, y el editor muestra el
+-- resultado de la ÚLTIMA sentencia. Si te pasa eso, corré el
+-- explain solo, sin el begin ni el rollback, y después borra lo
+-- insertado a mano:
+--
+--     delete from ix_consulta where id_consulta > 900000;
 
 
 -- [7.3] Lo mismo, pero sin índices: los borramos, medimos y
@@ -450,8 +458,25 @@ select indexrelname as indice,
 from pg_stat_user_indexes
 where relname in ('ix_consulta', 'ix_mascota')
 order by idx_scan;
--- ESPERADO: los que creamos y probamos tienen idx_scan > 0.
--- En un sistema real, los que quedan en 0 son candidatos a borrar.
+-- ESPERADO, Y ACÁ HAY UNA TRAMPA: los índices de ix_mascota van a
+-- tener idx_scan > 0, pero los CUATRO de ix_consulta van a estar
+-- en 0, aunque los usamos durante toda la clase.
+--
+-- No es un error: en [7.3] los borramos y en [7.4] los volvimos a
+-- crear. Para PostgreSQL son índices nuevos, recién nacidos, y el
+-- contador arranca de cero con cada uno.
+--
+-- Vale la pena mostrarlo: la estadística cuenta desde que existe
+-- el índice, no desde que existe la tabla. En un sistema real, un
+-- idx_scan en 0 significa "no se usó" solo si el índice lleva
+-- tiempo ahi.
+--
+-- Para verlo moverse, volvé a correr [2.3] y después este bloque:
+-- idx_cons_diag pasa a 1.
+
+-- [8.2] Los de ix_mascota, que no tocamos, conservan la cuenta.
+-- Mirá idx_mas_nombre, idx_mas_nombre_lower e idx_mas_id: esos
+-- vienen contando desde [3.1], [3.3] y [6.3].
 
 
 -- ════════════════════════════════════════════════════════════

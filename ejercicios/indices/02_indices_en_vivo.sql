@@ -536,7 +536,41 @@ order by idx_scan;
 
 
 -- ════════════════════════════════════════════════════════════
--- 9 · LIMPIEZA — al terminar la unidad
+-- 9 · VOLVER A EMPEZAR, Y LIMPIEZA
 -- ════════════════════════════════════════════════════════════
+
+-- [9.1] REINICIAR LA DEMO sin regenerar los datos.
+--
+-- Hace falta porque los create index de arriba no dicen
+-- "if not exists": si el índice ya está, dan error. Esto los
+-- borra todos y deja las tablas intactas, así que podés volver
+-- a correr el archivo desde [1.1] y da exactamente lo mismo.
+--
+-- Como además son índices nuevos, los contadores de [8.1]
+-- arrancan otra vez de cero.
+
+drop index if exists idx_cons_id;
+drop index if exists idx_cons_diag;
+drop index if exists idx_cons_vet_fecha;
+drop index if exists idx_cons_caras;
+drop index if exists idx_mas_nombre;
+drop index if exists idx_mas_nombre_lower;
+drop index if exists idx_mas_id;
+
+-- Por las dudas, si alguna vez corriste el insert de [7.2] sin
+-- el begin/rollback, esto saca las filas de prueba:
+delete from ix_consulta where id_consulta > 900000;
+
+analyze ix_consulta;
+analyze ix_mascota;
+
+
+-- [9.2] EMPEZAR DE CERO DE VERDAD: volvé a correr
+-- 01_datos_demo.sql entero. Arranca borrando las dos tablas, así
+-- que no hace falta borrarlas antes. Tarda unos segundos.
+
+
+-- [9.3] LIMPIEZA al terminar la unidad. Las dos tablas ocupan
+-- unos 25 MB más los índices.
 -- drop table if exists ix_consulta;
 -- drop table if exists ix_mascota;

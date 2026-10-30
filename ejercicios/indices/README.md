@@ -44,6 +44,12 @@ Los números —`cost`, tiempos— van a dar distinto en cada máquina. Lo que i
 - **Dónde aparece la condición**: `Filter` significa que leyó la fila y después la descartó; `Index Cond` significa que ni la leyó.
 - **`Rows Removed by Filter`**: cuántas filas leyó al pedo. Si es un número grande, ahí hay algo para mejorar.
 
+## Volver a correr la demo
+
+Los `create index` del segundo script no dicen `if not exists`: si el índice ya existe, dan error. Para repetir el recorrido está el bloque **`[9.1]`**, que borra los siete índices y deja las tablas intactas — no hace falta regenerar las 220.000 filas. Como son índices nuevos, los contadores de `[8.1]` también arrancan de cero.
+
+Para empezar de cero del todo, volvé a correr `01_datos_demo.sql`: arranca borrando las dos tablas, así que no hay que borrarlas antes.
+
 ## Al terminar
 
-Al final de cada script hay un bloque de limpieza comentado para borrar las dos tablas. Ocupan unos 25 MB.
+El bloque `[9.3]` del segundo script, comentado, borra las dos tablas. Ocupan unos 25 MB más los índices.

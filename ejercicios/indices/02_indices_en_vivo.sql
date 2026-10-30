@@ -508,6 +508,28 @@ order by idx_scan;
 -- Para verlo moverse, volvé a correr [2.3] y después este bloque:
 -- idx_cons_diag pasa a 1.
 
+-- MEDIDO EL 29/10:
+--     idx_cons_id             0     4408 kB
+--     idx_cons_diag           0     1368 kB
+--     idx_cons_vet_fecha      0     1536 kB
+--     idx_cons_caras          0      256 kB
+--     idx_mas_nombre          1      632 kB
+--     idx_mas_nombre_lower    1      632 kB
+--     idx_mas_id           1013      456 kB
+--
+-- Los cuatro ceros son los recién creados en [7.4]. Los otros
+-- tres vienen contando desde [3.1], [3.3] y [6.3].
+--
+-- Y MIRÁ EL 1013, que es el mejor número del script: idx_mas_id
+-- se usó MIL TRECE VECES en una sola consulta. Es el Nested Loop
+-- de [6.3]: por cada una de las ~1.040 consultas que quedaron del
+-- lado izquierdo, el motor fue al índice a buscar esa mascota.
+-- Ahí se ve, contado, que "por cada fila de una tabla busca en la
+-- otra" es literal.
+--
+-- Compará con idx_mas_nombre, que dice 1: una consulta, una
+-- búsqueda. El contador no cuenta consultas, cuenta búsquedas.
+
 -- [8.2] Los de ix_mascota, que no tocamos, conservan la cuenta.
 -- Mirá idx_mas_nombre, idx_mas_nombre_lower e idx_mas_id: esos
 -- vienen contando desde [3.1], [3.3] y [6.3].

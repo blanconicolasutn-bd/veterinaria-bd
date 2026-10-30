@@ -4,6 +4,8 @@ Acá está `09_autochequeo_ejercicios.sql`: un script para **verificar tus propi
 
 **No trae las soluciones.** Trae las verificaciones. Vos escribís tu respuesta, corrés el chequeo que corresponde, y te dice si quedó bien — y si no, qué mirar.
 
+Las resoluciones están en cada carpeta de ejercicios, al lado de su guía. Conviene usarlas después del chequeo y no antes: si el bloque dice `MAL`, el texto ya te apunta dónde mirar, y encontrarlo vos es la mitad del ejercicio.
+
 ## Antes de empezar
 
 Tenés que tener corridos, en este orden, `sql/01_esquema.sql` y `sql/02_datos.sql` en tu propio proyecto de Supabase.

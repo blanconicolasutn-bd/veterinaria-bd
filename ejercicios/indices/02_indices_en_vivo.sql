@@ -321,6 +321,16 @@ from ix_consulta c
 join ix_mascota m on m.id_mascota = c.id_mascota;
 -- ESPERADO: Hash Join. Arma una tabla hash con la más chica
 -- (ix_mascota) y recorre la otra comparando contra ella.
+--
+-- MEDIDO EL 29/10: Hash Join (cost=597.00..7179.00 rows=200000)
+--   Hash Cond: (c.id_mascota = m.id_mascota)
+--   -> Seq Scan on ix_consulta c   (200000 filas)
+--   -> Hash  (20000 filas)  Buckets: 32768  Memory Usage: 1194kB
+--   Execution Time: 719.744 ms
+--
+-- Se ve el método completo: arma la tabla hash con ix_mascota
+-- (1,2 MB en memoria) y después pasa ix_consulta por arriba.
+-- Es lo correcto cuando el join devuelve TODO: 200.000 filas.
 
 
 -- [6.2] Join filtrando fuerte de un lado.
@@ -329,9 +339,24 @@ select c.id_consulta, m.nombre
 from ix_consulta c
 join ix_mascota m on m.id_mascota = c.id_mascota
 where c.diagnostico = 'Insuficiencia cardíaca';
--- ESPERADO: Nested Loop. Como del lado izquierdo quedan pocas
--- filas, al motor le conviene buscar una por una en la otra tabla
--- — si tiene un índice para hacerlo.
+-- ESPERADO: Hash Join otra vez, pero mucho más barato.
+--
+-- MEDIDO EL 29/10: Hash Join (cost=597.30..1059.28 rows=1040)
+--   -> Index Scan using idx_cons_diag on ix_consulta c
+--      Index Cond: (diagnostico = 'Insuficiencia cardíaca')
+--   -> Hash -> Seq Scan on ix_mascota m  (20000 filas)
+--   Execution Time: 9.368 ms
+--
+-- 719 ms -> 9 ms: el filtro redujo el lado izquierdo de 200.000
+-- filas a 1.040, usando el índice de [2.2].
+--
+-- PERO el método de join NO cambió, y la razón es el punto del
+-- bloque: para ir fila por fila a ix_mascota el motor necesitaría
+-- un índice por id_mascota, y ix_mascota no tiene ninguno (las
+-- tablas se crearon sin primary key a propósito). Sin ese índice,
+-- buscar 1.040 veces en una tabla de 20.000 filas significaría
+-- 1.040 recorridos completos. Le sigue conviniendo armar el hash
+-- una sola vez.
 
 
 -- [6.3] Démosle ese índice y comparemos.
@@ -344,6 +369,21 @@ join ix_mascota m on m.id_mascota = c.id_mascota
 where c.diagnostico = 'Insuficiencia cardíaca';
 -- ESPERADO: Nested Loop con Index Scan adentro, y bastante más
 -- rápido que [6.2].
+--
+-- MEDIDO EL 29/10: Nested Loop (cost=0.58..999.98 rows=1040)
+--   -> Index Scan using idx_cons_diag on ix_consulta c
+--   -> Index Scan using idx_mas_id on ix_mascota m
+--      Index Cond: (id_mascota = c.id_mascota)
+--   Execution Time: 4.583 ms
+--
+-- ACÁ ESTÁ LO IMPORTANTE DE LA SECCIÓN 6: no tocamos la consulta,
+-- es letra por letra la misma que [6.2]. Creamos un índice en la
+-- OTRA tabla y el motor cambió de estrategia solo: dejó el hash y
+-- pasó a buscar fila por fila, 9,368 ms -> 4,583 ms.
+--
+-- Un índice no acelera una consulta solamente haciendo más rápido
+-- un paso: a veces le habilita al motor un plan entero que antes
+-- no le convenía.
 
 
 -- ════════════════════════════════════════════════════════════

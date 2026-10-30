@@ -42,7 +42,7 @@ Está todo en **`ejercicios/normalizacion/`**, con su propio README. En resumen:
 2. Verificá tus respuestas con `autochequeo/09_autochequeo_ejercicios.sql`, de a un bloque por vez. La mayoría de los chequeos responden `OK` o `MAL`, y cuando dicen `MAL` indican qué revisar.
 3. Algunos bloques **tienen que dar error**: están marcados, y el error que devuelven es la respuesta correcta — lo que se prueba ahí es que tu código corte cuando tiene que cortar.
 
-> Los ejercicios 3 y 9 de transacciones no se pueden hacer en el SQL Editor: los dos necesitan ver fallar una sentencia y seguir en la misma transacción, y el editor manda el bloque entero de una vez. Se hacen en `psql`, pgAdmin o DBeaver, o se ven en clase. Está explicado en `autochequeo/README.md`.
+> Los ejercicios 3 y 9 de transacciones se resuelven en Supabase como todos los demás, pero tratan sobre qué pasa cuando una sentencia falla en el medio de una transacción, así que la guía los explica aparte. Está ampliado en `autochequeo/README.md`.
 
 ## Practicar el flujo de Fork + Pull Request
 

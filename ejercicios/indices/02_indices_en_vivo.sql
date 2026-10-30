@@ -397,6 +397,25 @@ from pg_stat_user_indexes
 where relname in ('ix_consulta', 'ix_mascota')
 order by pg_relation_size(indexrelid) desc;
 -- ESPERADO: entre todos suman varios MB sobre una tabla de ~25 MB.
+--
+-- MEDIDO EL 29/10:
+--     idx_cons_id            4408 kB
+--     idx_cons_vet_fecha     1536 kB
+--     idx_cons_diag          1368 kB
+--     idx_mas_nombre          632 kB
+--     idx_mas_nombre_lower    632 kB
+--     idx_mas_id              456 kB
+--     idx_cons_caras          256 kB
+--                            -------
+--                           ~9,1 MB
+--
+-- Dos cosas para mirar:
+--   1) Los de ix_consulta solos suman 7,4 MB sobre una tabla de
+--      ~25 MB: casi un 30% más de disco.
+--   2) idx_cons_caras pesa 256 kB contra los 1536 kB de
+--      idx_cons_vet_fecha, que indexa la MISMA columna fecha.
+--      Seis veces menos, porque solo guarda las filas caras.
+--      Es lo que prometía el bloque [5.1], ahora con el número.
 
 
 -- [7.2] Cuánto tarda insertar 20.000 filas CON todos esos índices.
@@ -409,6 +428,9 @@ select 900000 + g, 1, 1001, current_date, 'Prueba', 'Sano', 1000
 from generate_series(1, 20000) g;
 rollback;
 -- ESPERADO: anotá el Execution Time.
+--
+-- MEDIDO EL 29/10: Insert on ix_consulta
+--   Execution Time: 114.635 ms
 --
 -- SI SUPABASE NO TE MUESTRA EL PLAN: el bloque termina en
 -- rollback, que no devuelve filas, y el editor muestra el
@@ -435,8 +457,20 @@ from generate_series(1, 20000) g;
 rollback;
 -- ESPERADO: bastante más rápido que [7.2].
 --
--- Ésa es la contra: cada índice hay que mantenerlo en cada alta,
--- baja y modificación. Un índice que nadie usa es solo costo.
+-- MEDIDO EL 29/10: Insert on ix_consulta
+--   Execution Time: 39.255 ms
+--
+--     con los 4 índices    114,635 ms
+--     sin índices           39,255 ms
+--
+-- Casi TRES VECES más lento por tener índices. Los mismos 20.000
+-- insert, la misma tabla: la diferencia son los 75 ms que el
+-- motor gastó en actualizar los cuatro índices, uno por fila.
+--
+-- Ésa es la contra, y es la única parte del tema donde un índice
+-- JUEGA EN CONTRA: cada uno hay que mantenerlo en cada alta, baja
+-- y modificación. Un índice que nadie usa no es neutro, es costo
+-- puro: ocupa disco y hace más lenta cada escritura.
 
 
 -- [7.4] Los volvemos a crear.

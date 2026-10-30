@@ -1,0 +1,7 @@
+# Scripts de verificacion del profesor: contienen las soluciones.
+# No se publican.
+sql/07_verificar_en_supabase.sql
+sql/08_verificar_ejercicios_en_supabase.sql
+sql/09_autochequeo_ejercicios.sql
+sql/10_chequeo_automatico.sql
+sql/11_falsos_negativos.sql

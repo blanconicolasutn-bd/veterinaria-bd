@@ -213,17 +213,46 @@ explain analyze
 select * from ix_consulta
 where matricula = 1003 and fecha = date '2024-06-15';
 -- ESPERADO: Index Scan using idx_cons_vet_fecha.
+--
+-- MEDIDO EL 29/10: Index Scan using idx_cons_vet_fecha
+--   (cost=0.29..33.68 rows=3 width=42)
+--   Index Cond: ((matricula = 1003) AND (fecha = '2024-06-15'::date))
+--   Execution Time: 0.292 ms
+--
+-- Mirá que las DOS condiciones están en Index Cond, y no hay
+-- ningún Filter: el motor no leyó una sola fila de más. El índice
+-- resolvió la búsqueda completa.
 
 
 -- [4.3] Filtrando por la SEGUNDA sola: no le sirve igual.
 explain analyze
 select * from ix_consulta
 where fecha = date '2024-06-15';
--- ESPERADO: Seq Scan, o a lo sumo un recorrido completo del
--- índice. Un índice (a, b) sirve para buscar por a, o por a y b,
--- pero no para buscar solo por b: es como el índice de un libro
--- ordenado por apellido y nombre, que no sirve para buscar por
--- nombre.
+-- MEDIDO EL 29/10: Index Scan using idx_cons_vet_fecha
+--   (cost=0.29..1805.24 rows=92 width=42)
+--   Index Cond: (fecha = '2024-06-15'::date)
+--   Execution Time: 6.124 ms
+--
+-- OJO ACÁ, QUE ES EL PUNTO DEL BLOQUE: dice "Index Scan", así que
+-- a primera vista parecería que el índice sí le sirve. Compará los
+-- costos con el bloque anterior:
+--
+--     [4.2] por matrícula y fecha   cost 0.29..33.68     0,292 ms
+--     [4.3] por fecha sola          cost 0.29..1805.24   6,124 ms
+--
+-- Cincuenta veces más caro con el MISMO índice. En [4.2] el motor
+-- salta directo al lugar donde empiezan las consultas de esa
+-- matrícula. En [4.3] no tiene por dónde entrar, así que recorre
+-- el índice ENTERO mirando la fecha de cada entrada.
+--
+-- Un índice (a, b) sirve para buscar por a, o por a y b, pero no
+-- para buscar solo por b: es como el índice de un libro ordenado
+-- por apellido y nombre. Buscar un nombre suelto se puede, pero
+-- leyendo el índice de punta a punta.
+--
+-- (Si en tu base da Seq Scan en vez de Index Scan, también está
+-- bien: son las dos formas caras de hacer lo mismo, y el motor
+-- elige según cuántas filas estime.)
 
 
 -- ════════════════════════════════════════════════════════════

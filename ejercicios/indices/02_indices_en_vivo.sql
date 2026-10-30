@@ -35,6 +35,12 @@ where id_consulta = 150000;
 --           Rows Removed by Filter: 199999
 -- Leyó las 200.000 filas para quedarse con una.
 -- ANOTÁ el Execution Time: lo vamos a comparar en [1.4].
+--
+-- MEDIDO EN SUPABASE EL 29/10:
+--   Seq Scan on ix_consulta (cost=0.00..4332.00 rows=1 width=42)
+--   Rows Removed by Filter: 199999
+--   Planning Time:    0.284 ms
+--   Execution Time: 505.359 ms   <-- el número a retener
 
 
 -- [1.3] Creamos el índice.
@@ -50,6 +56,17 @@ where id_consulta = 150000;
 --           Index Cond: (id_consulta = 150000)
 -- Desapareció el Rows Removed by Filter: ya no lee filas de más.
 -- Comparar el Execution Time con el de [1.2].
+--
+-- MEDIDO EN SUPABASE EL 29/10:
+--   Index Scan using idx_cons_id (cost=0.42..2.64 rows=1 width=42)
+--   Index Cond: (id_consulta = 150000)
+--   Planning Time:  1.792 ms
+--   Execution Time: 2.812 ms
+--
+--   505,359 ms  ->  2,812 ms  =  180 VECES MÁS RÁPIDO.
+--   Y mirá el costo estimado: de 4332 bajo a 2,64. Por eso el
+--   motor cambió de plan: no es magia, es que ahora hay uno
+--   mucho más barato.
 --
 -- LO IMPORTANTE: nadie le pidió que usara el índice. Lo eligió
 -- solo, porque ahora es el plan más barato. SQL es declarativo.
@@ -78,6 +95,13 @@ select * from ix_consulta
 where diagnostico = 'Insuficiencia cardíaca';
 -- ESPERADO: usa el índice — Bitmap Index Scan o Index Scan.
 -- Devuelve poquitas filas, así que ir al índice conviene.
+--
+-- MEDIDO EL 29/10: Index Scan using idx_cons_diag
+--   (cost=0.29..447.98 rows=1040)
+--   Index Cond: ((diagnostico)::text = 'Insuficiencia cardíaca'::text)
+--   Execution Time: 1.759 ms
+-- Estimó 1040 filas y hay 1011: las estadísticas del ANALYZE
+-- están bien, y por eso acertó el plan.
 
 
 -- [2.4] Buscamos el diagnóstico COMÚN: ~170.000 filas de 200.000.
@@ -89,11 +113,33 @@ where diagnostico = 'Sano';
 -- No es un error del motor: si vas a devolver el 85% de la tabla,
 -- ir al índice y después a la tabla por cada fila sale MÁS caro
 -- que leer todo de corrido. Es el "70%" del apunte, en vivo.
+--
+-- MEDIDO EL 29/10: Seq Scan on ix_consulta
+--   (cost=0.00..4332.00 rows=169660 width=42)
+--   Rows Removed by Filter: 30026
+--   Execution Time: 30.240 ms
+--
+-- DOS COSAS PARA MOSTRAR ACÁ:
+--   1) Es el MISMO índice de [2.3], que recién usó y ahora ignora.
+--      Lo único que cambió es cuántas filas devuelve la consulta.
+--   2) Ahora "Rows Removed by Filter" es 30.026 y no 199.999: las
+--      filas que leyó de más son pocas, porque casi todas sirven.
 
 
 -- ════════════════════════════════════════════════════════════
 -- 3 · LA FUNCIÓN QUE TAPA EL ÍNDICE
 -- ════════════════════════════════════════════════════════════
+
+-- [3.0] PRIMERO: buscá un nombre que exista de verdad.
+-- Los nombres se generaron al azar, así que 'Rocky 1234' puede
+-- no existir en tu base. Copiá el que te devuelva esto y usalo
+-- en los bloques que siguen, en lugar de 'Rocky 1234'.
+select nombre from ix_mascota where id_mascota = 1234;
+
+-- El plan es el mismo exista o no la fila — lo que estamos
+-- mirando es cómo BUSCA, no qué encuentra —, pero queda mejor
+-- si además devuelve algo.
+
 
 -- [3.1] Índice sobre el nombre de la mascota.
 create index idx_mas_nombre on ix_mascota (nombre);
@@ -102,6 +148,11 @@ explain analyze
 select * from ix_mascota
 where nombre = 'Rocky 1234';
 -- ESPERADO: Index Scan. Hasta acá, todo bien.
+--
+-- MEDIDO EL 29/10: Index Scan using idx_mas_nombre
+--   (cost=0.29..2.51 rows=1 width=25)
+--   Index Cond: ((nombre)::text = 'Rocky 1234'::text)
+--   Execution Time: 0.778 ms
 
 
 -- [3.2] Ahora buscamos sin importar mayúsculas y minúsculas.
@@ -113,6 +164,16 @@ where lower(nombre) = 'rocky 1234';
 -- El índice está sobre nombre, no sobre lower(nombre). Para el
 -- motor son dos cosas distintas y no lo puede usar. Es el error
 -- más común: "creé el índice y no lo usa".
+--
+-- MEDIDO EL 29/10: Seq Scan on ix_mascota
+--   (cost=0.00..447.00 rows=100 width=25)
+--   Filter: (lower((nombre)::text) = 'rocky 1234'::text)
+--   Rows Removed by Filter: 20000
+--   Execution Time: 12.134 ms
+--
+-- Leyó las 20.000 filas. Y fijate el contraste con [3.1]: misma
+-- tabla, misma columna, mismo índice — lo único que cambió es
+-- que la condición le aplica una función a la columna.
 
 
 -- [3.3] Se arregla con un índice por expresión.
@@ -121,7 +182,22 @@ create index idx_mas_nombre_lower on ix_mascota (lower(nombre));
 explain analyze
 select * from ix_mascota
 where lower(nombre) = 'rocky 1234';
--- ESPERADO: Index Scan using idx_mas_nombre_lower.
+-- ESPERADO: usa idx_mas_nombre_lower.
+--
+-- MEDIDO EL 29/10: Bitmap Heap Scan on ix_mascota
+--   Recheck Cond: (lower((nombre)::text) = 'rocky 1234'::text)
+--   -> Bitmap Index Scan on idx_mas_nombre_lower
+--      (cost=0.00..2.14 rows=100)
+--   Execution Time: 0.059 ms
+--
+--   12,134 ms  ->  0,059 ms  =  unas 200 veces más rápido.
+--
+-- NO es un "Index Scan" a secas: el motor eligió un Bitmap Scan,
+-- que es una variante. Primero arma en memoria un mapa de qué
+-- páginas del disco tienen filas que sirven (Bitmap Index Scan)
+-- y después las lee de una (Bitmap Heap Scan). Lo elige cuando
+-- espera varias filas dispersas. Para lo que estamos viendo es
+-- lo mismo: usó el índice.
 
 
 -- ════════════════════════════════════════════════════════════

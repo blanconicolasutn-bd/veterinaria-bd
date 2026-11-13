@@ -14,6 +14,7 @@ Material de práctica del ejercicio de la veterinaria (Unidad IV — DDL/DML/con
 - **`ejercicios/indices/`** — índices y optimización (Unidad VII): un script que genera dos tablas grandes —20.000 mascotas y 200.000 consultas— y otro de 24 bloques para ver con `EXPLAIN` cuándo el motor usa un índice y cuándo no. Tiene su propio README.
 - **`autochequeo/`** — un script para **verificar tus propias respuestas** de transacciones, funciones y triggers. No trae las soluciones — ésas están en cada carpeta de ejercicios —: trae las verificaciones, y cuando algo está mal te dice qué mirar.
 - **`ejercicios repaso primera parte/`** — ejercicios integradores de repaso (Unidad I a IV bis): teoría, DER, DDL, consultas, subconsultas y transacciones, con sus resoluciones. Incluye ejercicios extra de subconsultas en SELECT, FROM y WHERE sobre la veterinaria.
+- **`parciales/`** — el 1er y el 2do parcial que se tomaron en 2026 (2C), cada uno con su enunciado y su resolución, en Word y en PDF.
 - **`practica/`** — espacio opcional para practicar el flujo de Pull Request (ver abajo).
 
 ## Cómo usar la base
